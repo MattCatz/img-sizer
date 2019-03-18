@@ -25,8 +25,8 @@ async function main() {
     dict = new Map();
     for (let image of images.flat()) {
       let dimensions = {width: image.width, height: image.height};
-      if dict.has(image.url) {
-        dict[image.url].push(dimensions);
+      if (dict.has(image.url)) {
+        dict.get(image.url).push(dimensions);
       } else {
         dict.set(image.url, [dimensions]);
       }
@@ -34,7 +34,17 @@ async function main() {
 
     return dict;
   }
-   
+  
+  const merge_maps = (adult, child) => {
+    for (let [key, value] of child) {
+      if (adult.has(key)) {
+        adult.get(key).push(...value);
+      } else {
+        adult.set(key, value);
+      }
+    }
+  }
+ 
   //const images = await page.$$eval('img',myfunc);
   //console.log(images);
 
@@ -49,6 +59,8 @@ async function main() {
 
   crawler = await browser.newPage(); 
 
+  let results = new Map();
+
   for (let link of filtered_links) {
     await crawler.goto(link,{"waitUntil" : "networkidle0"});
     console.log("Going to ", link);
@@ -57,9 +69,11 @@ async function main() {
       await crawler.setViewport(viewport);
       images.push(await crawler.$$eval('img', myfunc));
     }
-    console.log(merge(images));
+    merge_maps(results, merge(images));
   }
 
+
+  console.log(results);
   await browser.close();
 }
 
