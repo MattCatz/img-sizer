@@ -23,13 +23,16 @@ async function main() {
 
   const merge = (images) => {
     dict = new Map();
-    for (let image of images) {
-    //  if dict.has(image.url) {
-        
-      //} else {
-	//dict.set(image)
-//      }
+    for (let image of images.flat()) {
+      let dimensions = {width: image.width, height: image.height};
+      if dict.has(image.url) {
+        dict[image.url].push(dimensions);
+      } else {
+        dict.set(image.url, [dimensions]);
+      }
     }
+
+    return dict;
   }
    
   //const images = await page.$$eval('img',myfunc);
@@ -53,9 +56,8 @@ async function main() {
     for (let viewport of viewports) {
       await crawler.setViewport(viewport);
       images.push(await crawler.$$eval('img', myfunc));
-      console.log(images);
     }
-    //merge(images);
+    console.log(merge(images));
   }
 
   await browser.close();
